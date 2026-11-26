@@ -71,6 +71,10 @@
     board: iconBoard,
   };
 
+  let catalogEl;
+  let newsEl;
+  let locationEl;
+
   const featurePhotos = [
     { src: '/media/gallery/render-08.png', alt: 'The pier with the water tram' },
     { src: '/media/gallery/render-02.png', alt: 'The cranes lit at dusk' },
@@ -364,7 +368,7 @@
       duration: 0.75,
       ease: 'power3.out',
       stagger: 0.08,
-      immediateRender: false,
+      immediateRender: true,
       scrollTrigger: { trigger: trigger || list[0], start: 'top 92%', once: true },
       ...vars,
     });
@@ -608,6 +612,62 @@
     return line.slice(line.lastIndexOf(' ') + 1);
   }
 
+  function loadFlats() {
+    getJSON('/api/flats.json').then((list) => {
+      flats = list;
+      flatsStore.set(list);
+      window.appState.flats = list;
+      tick().then(() => ScrollTrigger.refresh());
+
+      list.forEach((flat) => {
+        getJSON('/api/flats/' + flat.id + '.json').then((data) => {
+          Object.assign(flat, data);
+          flats = flats;
+        });
+      });
+    });
+
+    getJSON('/api/flats.json?v=2').then(preparePayments);
+
+    getJSON('/api/flats.json?_=' + Date.now()).then((list) => {
+      calcFlats = list;
+      onCalc();
+    });
+  }
+
+  function loadNews() {
+    getJSON('/api/news.json').then((list) => {
+      news = list;
+      tick().then(() => {
+        reveal('#news .section-title', '#news');
+        reveal('#news .news-item', '#news .news-list', { stagger: 0.07 });
+        reveal('#news .news-photo', '#news', {
+          y: 0,
+          clipPath: 'inset(0 0 100% 0)',
+          duration: 1.1,
+          ease: 'power4.inOut',
+        });
+        ScrollTrigger.refresh();
+      });
+    });
+  }
+
+  function initMap() {
+    if (map || !mapEl) return;
+
+    map = new maplibregl.Map({
+      container: mapEl,
+      style: config.mapStyle,
+      center: config.mapCenter,
+      zoom: config.mapZoom,
+      scrollZoom: false,
+      attributionControl: { compact: false },
+    });
+    map.setPadding({ left: 640 });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    map.on('load', paintMap);
+  }
+
   onMount(() => {
     getJSON('/api/sections.json').then((data) => {
       sections = data;
@@ -619,30 +679,41 @@
       });
     });
 
-    getJSON('/api/flats.json').then((list) => {
-      flats = list;
-      flatsStore.set(list);
-      window.appState.flats = list;
-      tick().then(() => ScrollTrigger.refresh());
-      list.forEach((flat) => {
-        getJSON('/api/flats/' + flat.id + '.json').then((data) => {
-          Object.assign(flat, data);
-          flats = flats;
-        });
-      });
+    const catalogObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          catalogObserver.disconnect();
+          loadFlats();
+        }
+      },
+      { rootMargin: '500px' }
+    );
+
+    const newsObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          newsObserver.disconnect();
+          loadNews();
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    const mapObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          mapObserver.disconnect();
+          initMap();
+        }
+      },
+      { rootMargin: '250px' }
+    );
+
+    tick().then(() => {
+      if (catalogEl) catalogObserver.observe(catalogEl);
+      if (newsEl) newsObserver.observe(newsEl);
+      if (locationEl) mapObserver.observe(locationEl);
     });
-
-    getJSON('/api/flats.json?v=2').then(preparePayments);
-
-    setInterval(() => {
-      getJSON('/api/prices.json').then((data) => {
-        const map = {};
-        data.items.forEach((p) => {
-          map[p.id] = p.price;
-        });
-        prices = map;
-      });
-    }, window.appConfig.pricesPollInterval);
 
     uiStore.subscribe((s) => {
       lightboxIndex = s.lightboxIndex;
@@ -651,17 +722,14 @@
       leadOpen = s.leadOpen;
     });
 
+    document.fonts.ready.then(intro);
+
     ScrollTrigger.create({
       trigger: heroStage,
       start: 'top top',
       end: '+=200%',
       pin: true,
     });
-
-    document.fonts.ready.then(intro);
-
-    window.addEventListener('scroll', onScroll);
-    window.addEventListener('resize', onResize);
 
     try {
       gallerySwiper = new Swiper(galleryEl, {
@@ -686,48 +754,23 @@
       }
     }, 4500);
 
-    getJSON('/api/flats.json?_=' + Date.now()).then((list) => {
-      calcFlats = list;
-      onCalc();
-    });
-
-    map = new maplibregl.Map({
-      container: mapEl,
-      style: config.mapStyle,
-      center: config.mapCenter,
-      zoom: config.mapZoom,
-      scrollZoom: false,
-      attributionControl: { compact: false },
-    });
-    map.setPadding({ left: 640 });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-    map.on('load', paintMap);
-
-    getJSON('/api/news.json').then((list) => {
-      news = list;
-      tick().then(() => {
-        reveal('#news .section-title', '#news');
-        reveal('#news .news-item', '#news .news-list', { stagger: 0.07 });
-        reveal('#news .news-photo', '#news', { y: 0, clipPath: 'inset(0 0 100% 0)', duration: 1.1, ease: 'power4.inOut' });
-        ScrollTrigger.refresh();
-      });
-    });
-
-    window.addEventListener('scroll', onNewsScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
 
     if (!localStorage.getItem('cookies')) {
       setTimeout(() => {
         cookieVisible = true;
         tick().then(() => ScrollTrigger.refresh());
-      }, 1500);
+      }, 1600);
     }
 
-    setTimeout(() => {
-      const chat = document.querySelector('.cw-btn');
-      if (chat) {
-        chatDock.appendChild(chat);
-      }
-    }, 3000);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+      catalogObserver.disconnect();
+      newsObserver.disconnect();
+      mapObserver.disconnect();
+    };
   });
 </script>
 
@@ -911,7 +954,7 @@
     </div>
   </section>
 
-  <section id="catalog" class="catalog wrap">
+  <section id="catalog" class="catalog wrap" bind:this={catalogEl}>
     <div class="row">
       <div class="col-4">
         <h2 class="section-title">Choose a home</h2>
@@ -971,7 +1014,7 @@
       </div>
     </div>
   </section>
-  <section id="location" class="location">
+  <section id="location" class="location" bind:this={locationEl}>
     <div class="location-map" bind:this={mapEl}></div>
     <div class="location-card">
       <h2 class="location-title">Around the quay</h2>
@@ -1093,7 +1136,7 @@
     {/each}
   </section>
 
-  <section id="news" class="news wrap">
+  <section id="news" class="news wrap" bind:this={newsEl}>
     <div class="row">
       <div class="col-5">
         <div class="news-photo">
