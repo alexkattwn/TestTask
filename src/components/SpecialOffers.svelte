@@ -57,7 +57,7 @@
             image: imgTR,
             alt: 'Living room with sofa and balcony view',
         },
-    ];
+    ]
 
     function bookViewing() {
         onbook()
@@ -67,44 +67,44 @@
 <section class="special">
     <div class="special-inner">
         <header class="special-head">
-        <h2 class="special-title">Special offers</h2>
-        <p class="special-note">
-            Four homes at 7% off the list price<br />
-            until 31 December.
-        </p>
+            <h2 class="special-title">Special offers</h2>
+            <p class="special-note">
+                Four homes at 7% off the list price<br />
+                until 31 December.
+            </p>
         </header>
 
         <div class="special-track">
-        {#each offers as offer}
-            <article class="offer-card">
-            <div class="offer-photo">
-                <img src={offer.image} alt={offer.alt} loading="lazy" width="326" height="408" />
-            </div>
+            {#each offers as offer}
+                <article class="offer-card">
+                    <div class="offer-photo">
+                        <img src={offer.image} alt={offer.alt} loading="lazy" width="326" height="408" />
+                    </div>
 
-            <div class="offer-body">
-                <p class="offer-building">{offer.building}, floor {offer.floor}</p>
-                <p class="offer-meta">{offer.rooms} bedrooms, {offer.area} m²</p>
-                <p class="offer-desc">{offer.description}</p>
+                    <div class="offer-body">
+                        <p class="offer-building">{offer.building}, floor {offer.floor}</p>
+                        <p class="offer-meta">{offer.rooms} bedrooms, {offer.area} m²</p>
+                        <p class="offer-desc">{offer.description}</p>
 
-                <div class="offer-price">
-                <span class="price-new">{pounds(offer.price)}</span>
-                <span class="price-old">{pounds(offer.oldPrice)}</span>
-                </div>
+                        <div class="offer-price">
+                            <span class="price-new">{pounds(offer.price)}</span>
+                            <span class="price-old">{pounds(offer.oldPrice)}</span>
+                        </div>
 
-                <button class="offer-link" type="button" on:click={bookViewing}>
-                    Book a viewing
-                </button>   
-            </div>
-            </article>
-        {/each}
+                        <button class="offer-link" type="button" onclick={bookViewing}>
+                            Book a viewing
+                        </button>
+                    </div>
+                </article>
+            {/each}
         </div>
     </div>
 </section>
 
 <style>
-    /* Большие экраны (1440+) */
+    /* Десктоп / 1440 */
     .special {
-        --special-pad-y: 160px;
+        --special-pad-y: 120px;
         padding: var(--special-pad-y) 0;
         background: #eeecea;
     }
@@ -119,38 +119,39 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 40px;
-        margin-bottom: 48px;
+        gap: 32px;
+        margin-bottom: 40px;
     }
 
     .special-title {
         margin: 0;
         font-family: 'Newsreader', serif;
-        font-size: 64px;
+        font-size: 56px;
         font-weight: 300;
-        line-height: 1;
+        line-height: 1.05;
         letter-spacing: -0.03em;
         color: #333231;
     }
 
     .special-note {
-        max-width: 22ch;
+        max-width: 24ch;
         margin: 0;
-        font-size: 20px;
-        line-height: 1.4;
+        font-size: 16px;
+        line-height: 1.35;
         color: #6b6763;
         text-align: right;
     }
 
     .special-track {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
     }
 
     .offer-card {
         display: flex;
         flex-direction: column;
+        min-width: 0;
     }
 
     .offer-photo {
@@ -173,40 +174,40 @@
     }
 
     .offer-body {
-        padding-top: 16px;
+        padding-top: 12px;
     }
 
     .offer-building {
         margin: 0 0 2px;
-        font-size: 14px;
-        line-height: 1.35;
+        font-size: 12px;
+        line-height: 1.3;
         color: #6b6763;
     }
 
     .offer-meta {
         margin: 0;
-        font-size: 24px;
+        font-size: 18px;
         font-weight: 400;
         line-height: 1.25;
         color: #333231;
     }
 
     .offer-desc {
-        margin: 4px 0 0;
-        font-size: 14px;
-        line-height: 1.4;
+        margin: 3px 0 0;
+        font-size: 12px;
+        line-height: 1.35;
         color: #6b6763;
     }
 
     .offer-price {
         display: flex;
         align-items: baseline;
-        gap: 10px;
-        margin-top: 14px;
+        gap: 8px;
+        margin-top: 10px;
     }
 
     .price-new {
-        font-size: 24px;
+        font-size: 18px;
         font-weight: 500;
         letter-spacing: -0.01em;
         font-variant-numeric: tabular-nums;
@@ -214,20 +215,20 @@
     }
 
     .price-old {
-        font-size: 14px;
-        color: #6b6763;
+        font-size: 12px;
+        color: #8a8580;
         text-decoration: line-through;
         font-variant-numeric: tabular-nums;
     }
 
     .offer-link {
         display: inline-block;
-        margin-top: 12px;
+        margin-top: 10px;
         padding: 0;
         border: 0;
         background: none;
         font: inherit;
-        font-size: 16px;
+        font-size: 13px;
         color: #333231;
         text-decoration: underline;
         text-underline-offset: 0.22em;
@@ -239,34 +240,48 @@
         color: var(--accent, #c45c26);
     }
 
-    /* Планшеты ~768 */
-    @media (max-width: 1100px) {
+    /* Планшеты / 768 */
+     @media (max-width: 1024px) {
         .special {
-            --special-pad-y: 120px;
+            --special-pad-y: 80px;
+        }
+
+        .special-inner {
+            padding: 0 24px;
+        }
+
+        .special-head {
+            align-items: flex-start;
+            gap: 24px;
+            margin-bottom: 32px;
         }
 
         .special-title {
-            font-size: 48px;
+            font-size: 44px;
         }
 
         .special-note {
-            font-size: 18px;
+            font-size: 14px;
+            text-align: right;
         }
 
         .special-track {
-            grid-template-columns: repeat(2, 1fr);
-                gap: 48px 24px;
-            }
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 28px 20px;
+            overflow-x: visible;
+        }
 
-        .offer-meta {
-            font-size: 22px;
+        .offer-card {
+            flex: none;
+            width: auto;
         }
     }
 
-    /* Смартфоны ~375 */
+    /* Смартфоны / 375 */
     @media (max-width: 640px) {
         .special {
-            --special-pad-y: 96px;
+            --special-pad-y: 64px;
         }
 
         .special-inner {
@@ -275,18 +290,20 @@
 
         .special-head {
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 32px;
+            align-items: flex-end;
+            gap: 10px;
+            margin-bottom: 24px;
         }
 
         .special-title {
-            font-size: 34px;
+            align-self: flex-start;
+            font-size: 32px;
         }
 
         .special-note {
-            max-width: none;
-            text-align: left;
-            font-size: 16px;
+            max-width: 22ch;
+            font-size: 12px;
+            text-align: right;
         }
 
         .special-track {
@@ -296,7 +313,7 @@
             scroll-snap-type: x mandatory;
             scroll-padding-left: 16px;
             margin: 0 -16px;
-            padding: 0 16px 8px;
+            padding: 0 16px 6px;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
         }
@@ -306,16 +323,13 @@
         }
 
         .offer-card {
-            flex: 0 0 280px;
+            flex: 0 0 264px;
             scroll-snap-align: start;
         }
 
-        .offer-meta {
-            font-size: 20px;
-        }
-
+        .offer-meta,
         .price-new {
-            font-size: 22px;
+            font-size: 16px;
         }
     }
 </style>

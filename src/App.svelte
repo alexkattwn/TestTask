@@ -393,7 +393,14 @@
     reveal('#features .features-head', '#features');
     document.querySelectorAll('#features .feature-row').forEach((row) => {
       reveal(row.querySelectorAll('.feature-title, .feature-text'), row);
-      reveal(row.querySelectorAll('.feature-photo'), row, { y: 0, clipPath: 'inset(100% 0 0 0)', duration: 1, ease: 'power4.inOut', delay: 0.12 });
+      reveal(row.querySelectorAll('.feature-photo'), row, { 
+        opacity: 1,                
+        y: 0, 
+        clipPath: 'inset(100% 0 0 0)', 
+        duration: 1, 
+        ease: 'power4.inOut', 
+        delay: 0.12 
+      });
     });
 
     gsap
@@ -835,7 +842,7 @@
     </div>
   </section>
 
-  <section id="special" class="special wrap">
+  <section id="special">
     <SpecialOffers onbook={openCallback} />
   </section>
 
@@ -1933,7 +1940,6 @@
   .location {
     position: relative;
     height: 100vh;
-    min-width: 1200px;
     overflow: hidden;
     background: var(--surface);
   }
@@ -2057,7 +2063,6 @@
   }
 
   .mortgage {
-    min-width: 1200px;
     padding-top: 184px;
     padding-bottom: 184px;
   }
@@ -2252,7 +2257,6 @@
 
   .progress-section {
     position: relative;
-    min-width: 1200px;
   }
 
   .progress-panel {
@@ -2372,7 +2376,6 @@
   }
 
   .news {
-    min-width: 1200px;
     padding-top: 184px;
     padding-bottom: 184px;
   }
@@ -2458,7 +2461,6 @@
   }
 
   .questions {
-    min-width: 1200px;
     padding: 0 var(--margin);
     background: var(--field-1);
   }
@@ -2582,7 +2584,6 @@
   .visit {
     position: relative;
     height: 100vh;
-    min-width: 1200px;
     overflow: hidden;
     background: var(--ink);
   }
@@ -2711,7 +2712,6 @@
     grid-template-columns: 1fr 1fr;
     height: 100vh;
     min-height: 760px;
-    min-width: 1200px;
     background: var(--bg);
   }
 
@@ -2818,5 +2818,131 @@
 
   :global(.cw-btn:hover) {
     background: var(--ink) !important;
+  }
+
+  @media (max-width: 991px) {
+    .top {
+      justify-content: space-between;
+      gap: 12px;
+      height: auto;
+      min-height: 64px;
+      padding: 12px 16px;
+      flex-wrap: wrap;
+    }
+
+    .top-nav,
+    .top-phone,
+    .top-call {
+      display: none;
+    }
+
+    .top-logo {
+      margin-right: 0;
+    }
+
+    .top-btn {
+      margin-left: 0 !important;
+      font-size: 14px !important;
+    }
+
+    .about-lead {
+      max-width: 100%;
+    }
+
+    .about-paper {
+      position: static;
+      width: 100% !important;
+      margin-top: 12px;
+    }
+
+    .location {
+      height: auto;
+      min-height: 520px;
+    }
+
+    .location-card {
+      position: relative;
+      top: auto;
+      bottom: auto;
+      left: auto;
+      width: auto;
+      min-height: 0;
+      margin: 16px;
+    }
+
+    .mortgage-side {
+      position: static;
+    }
+
+    .mortgage-list {
+      column-count: 1;
+      column-gap: 0;
+    }
+
+    .questions {
+      padding: 0 16px;
+    }
+
+    .questions-side {
+      padding-top: 48px;
+      padding-bottom: 32px;
+    }
+
+    .questions-pics {
+      margin-top: 0;
+      padding-bottom: 40px;
+    }
+
+    .questions-square {
+      position: static;
+      width: 100%;
+      margin-top: 16px;
+    }
+
+    .visit {
+      height: auto;
+      padding: 24px 16px;
+    }
+
+    .visit-photo {
+      position: static;
+      height: 240px;
+      margin-bottom: 16px;
+    }
+
+    .visit-card {
+      position: static;
+      width: 100%;
+      padding: 24px 20px 0;
+    }
+
+    .visit-btn {
+      width: calc(100% + 40px);
+      margin: 16px -20px 0;
+    }
+
+    .footer {
+      grid-template-columns: 1fr;
+      height: auto;
+      min-height: 0;
+    }
+
+    .footer-photo {
+      height: 240px;
+    }
+
+    .footer-side {
+      padding: 32px 16px;
+    }
+
+    .footer-menu a {
+      font-size: 24px;
+    }
+
+    .footer-info {
+      flex-direction: column;
+      gap: 24px;
+      margin-top: 32px !important;
+    }
   }
 </style>
