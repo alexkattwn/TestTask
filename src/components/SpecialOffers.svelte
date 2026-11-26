@@ -102,6 +102,7 @@
 </section>
 
 <style>
+    /* Большие экраны (1440+) */
     .special {
         --special-pad-y: 160px;
         padding: var(--special-pad-y) 0;
@@ -236,5 +237,85 @@
 
     .offer-link:hover {
         color: var(--accent, #c45c26);
+    }
+
+    /* Планшеты ~768 */
+    @media (max-width: 1100px) {
+        .special {
+            --special-pad-y: 120px;
+        }
+
+        .special-title {
+            font-size: 48px;
+        }
+
+        .special-note {
+            font-size: 18px;
+        }
+
+        .special-track {
+            grid-template-columns: repeat(2, 1fr);
+                gap: 48px 24px;
+            }
+
+        .offer-meta {
+            font-size: 22px;
+        }
+    }
+
+    /* Смартфоны ~375 */
+    @media (max-width: 640px) {
+        .special {
+            --special-pad-y: 96px;
+        }
+
+        .special-inner {
+            padding: 0 16px;
+        }
+
+        .special-head {
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .special-title {
+            font-size: 34px;
+        }
+
+        .special-note {
+            max-width: none;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        .special-track {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-padding-left: 16px;
+            margin: 0 -16px;
+            padding: 0 16px 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .special-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .offer-card {
+            flex: 0 0 280px;
+            scroll-snap-align: start;
+        }
+
+        .offer-meta {
+            font-size: 20px;
+        }
+
+        .price-new {
+            font-size: 22px;
+        }
     }
 </style>
