@@ -188,7 +188,10 @@
   let lastY = 0;
   let lightboxIndex = -1;
 
-  function onScroll() {
+  let scrollTicking = false;
+
+  function runScroll() {
+    scrollTicking = false;
     const y = window.scrollY;
     const vh = window.innerHeight;
     const heroTop = heroEl.offsetTop;
@@ -255,6 +258,13 @@
         img.style.transform = 'scale(' + (1.08 - k * 0.06) + ')';
       });
     });
+  }
+
+  function onScroll() {
+    if (!scrollTicking) {
+      scrollTicking = true;
+      requestAnimationFrame(runScroll);
+    }
   }
 
   function onResize() {
@@ -327,7 +337,6 @@
         });
       });
       payments[flat.id] = rows;
-      console.log('payments', flat.id, rows);
     });
     window.appState.payments = payments;
   }
@@ -617,21 +626,18 @@
       flats = list;
       flatsStore.set(list);
       window.appState.flats = list;
+
+      calcFlats = list;
+      onCalc();
+      preparePayments(list);
+
       tick().then(() => ScrollTrigger.refresh());
 
       list.forEach((flat) => {
         getJSON('/api/flats/' + flat.id + '.json').then((data) => {
           Object.assign(flat, data);
-          flats = flats;
         });
       });
-    });
-
-    getJSON('/api/flats.json?v=2').then(preparePayments);
-
-    getJSON('/api/flats.json?_=' + Date.now()).then((list) => {
-      calcFlats = list;
-      onCalc();
     });
   }
 
@@ -715,7 +721,7 @@
       if (locationEl) mapObserver.observe(locationEl);
     });
 
-    uiStore.subscribe((s) => {
+    const unsubUi = uiStore.subscribe((s) => {
       lightboxIndex = s.lightboxIndex;
       activeFlat = s.activeFlat;
       callbackOpen = s.callbackOpen;
@@ -744,9 +750,9 @@
       });
     } catch (e) {}
 
-    setInterval(() => {
-      if (!gallerySwiper || lightboxIndex > -1) return;
-      if (galleryEl.getBoundingClientRect().top > window.innerHeight) return;
+    const galleryTimer = setInterval(() => {
+      if (document.hidden || !gallerySwiper || lightboxIndex > -1) return;
+      if (!galleryEl || galleryEl.getBoundingClientRect().top > window.innerHeight) return;
       if (gallerySwiper.isEnd) {
         gallerySwiper.slideTo(0);
       } else {
@@ -757,14 +763,18 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
 
+    let cookieTimer;
     if (!localStorage.getItem('cookies')) {
-      setTimeout(() => {
+      cookieTimer = setTimeout(() => {
         cookieVisible = true;
         tick().then(() => ScrollTrigger.refresh());
       }, 1600);
     }
 
     return () => {
+      clearInterval(galleryTimer);
+      clearTimeout(cookieTimer);
+      unsubUi();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       catalogObserver.disconnect();
@@ -836,7 +846,7 @@
     <div class="row g-3 about-mosaic" style="margin-top: 72px">
       <div class="col-8">
         <div class="about-photo" bind:this={aboutPhoto} style="aspect-ratio: 16 / 10">
-          <img src={quayAerial} alt="Larch Quay from the air: four buildings, the Larch Store and three cranes on the granite edge" bind:this={aboutImg} />
+          <img loading="lazy" src={quayAerial} alt="Larch Quay from the air: four buildings, the Larch Store and three cranes on the granite edge" bind:this={aboutImg} />
           <div class="about-paper" style="width: 320px">{@html aboutParts[1] || ''}</div>
         </div>
       </div>
@@ -866,6 +876,7 @@
       <div class="col-8">
         <div class="ratio ratio-16x9">
           <iframe
+            loading="lazy"
             src="https://www.youtube.com/embed/{config.youtubeId}?rel=0"
             title={film.title || 'The quay at dusk'}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -893,14 +904,14 @@
           <div class="row feature-row">
             <div class="col-6">
               <h3 class="feature-title">
-                <img class="feature-icon" src={icons[adv.icon]} alt="" style="width: 24px; height: 24px" />
+                <img loading="lazy" class="feature-icon" src={icons[adv.icon]} alt="" style="width: 24px; height: 24px" />
                 {adv.title}
               </h3>
               <p class="feature-text">{@html adv.text}</p>
             </div>
             <div class="col-6 feature-side">
               <div class="feature-photo" style="width: {photoSizes[i % 3].w}px; aspect-ratio: {photoReady[i] ? photoSizes[i % 3].ratio : 'auto'}">
-                <img
+                <img loading="lazy"
                   src={featurePhotos[i] ? featurePhotos[i].src : ''}
                   alt={featurePhotos[i] ? featurePhotos[i].alt : ''}
                   on:load={() => (photoReady[i] = true)}
@@ -931,21 +942,21 @@
           {#if m.type === 'tall'}
             <div class="swiper-slide gallery-module" style="width: calc(68vh * 3 / 4); height: 68vh">
               <div class="gallery-shot" on:click={() => openLightbox(m.items[0])}>
-                <img src={gallery[m.items[0]].src} alt={gallery[m.items[0]].alt} />
+                <img loading="lazy" src={gallery[m.items[0]].src} alt={gallery[m.items[0]].alt} />
               </div>
             </div>
           {:else if m.type === 'pair'}
             <div class="swiper-slide gallery-module gallery-pair" style="width: calc((68vh - 12px) / 2 * 4 / 3); height: 68vh">
               {#each m.items as idx}
                 <div class="gallery-shot" on:click={() => openLightbox(idx)}>
-                  <img src={gallery[idx].src} alt={gallery[idx].alt} />
+                  <img loading="lazy" src={gallery[idx].src} alt={gallery[idx].alt} />
                 </div>
               {/each}
             </div>
           {:else}
             <div class="swiper-slide gallery-module" style="width: calc(68vh * 16 / 10); height: 68vh">
               <div class="gallery-shot" on:click={() => openLightbox(m.items[0])}>
-                <img src={gallery[m.items[0]].src} alt={gallery[m.items[0]].alt} />
+                <img loading="lazy" src={gallery[m.items[0]].src} alt={gallery[m.items[0]].alt} />
               </div>
             </div>
           {/if}
@@ -1093,7 +1104,7 @@
             </div>
           {/each}
           <div class="mortgage-photo">
-            <img src={interior1} alt="A kitchen with windows from floor to ceiling, looking into the courtyard birches" />
+            <img loading="lazy" src={interior1} alt="A kitchen with windows from floor to ceiling, looking into the courtyard birches" />
           </div>
         </div>
       </div>
@@ -1103,7 +1114,7 @@
   <section id="progress" class="progress-section">
     <div class="progress-panel">
       {#if construction.length}
-        <img class="progress-img progress-img-on" src={construction[construction.length - 1].photos[0]} />
+        <img loading="lazy"class="progress-img progress-img-on" src={construction[construction.length - 1].photos[0]} />
       {/if}
       <div class="progress-shade"></div>
       <div class="progress-band">
@@ -1115,7 +1126,7 @@
     {#each construction as item, i}
       <div class="progress-panel">
         {#each item.photos as photo, n}
-          <img
+          <img loading="lazy"
             class="progress-img"
             class:progress-img-on={progressAir[i] ? n === 0 : n === 1}
             src={photo}
@@ -1141,7 +1152,7 @@
       <div class="col-5">
         <div class="news-photo">
           {#each news as item, i}
-            <img class:news-photo-on={i === newsActive} src={item.image} alt={item.title} />
+            <img loading="lazy"class:news-photo-on={i === newsActive} src={item.image} alt={item.title} />
           {/each}
         </div>
       </div>
@@ -1198,10 +1209,10 @@
       <div class="offset-1 col-6">
         <div class="questions-pics">
           <div class="questions-tall">
-            <img src="/media/photos/interior-living.png" alt="A living room in Quayside looking out over the water" />
+            <img loading="lazy" src="/media/photos/interior-living.png" alt="A living room in Quayside looking out over the water" />
           </div>
           <div class="questions-square">
-            <img src="/media/photos/facade-detail.png" />
+            <img loading="lazy" src="/media/photos/facade-detail.png" />
           </div>
         </div>
       </div>
@@ -1209,7 +1220,7 @@
   </section>
 
   <section id="visit" class="visit">
-    <img class="visit-photo" src="/media/photos/dusk-promenade.png" alt="The promenade along the granite edge at dusk" />
+    <img loading="lazy"class="visit-photo" src="/media/photos/dusk-promenade.png" alt="The promenade along the granite edge at dusk" />
     <div class="visit-card">
       <h2 class="visit-title">{visit.title || ''}</h2>
       <p class="visit-address" style="margin-top: 18px">{visit.address || ''}</p>
@@ -1246,7 +1257,7 @@
 
   <footer id="footer" class="footer">
     <div class="footer-photo">
-      <img src="/media/photos/cranes-dusk.png" />
+      <img src="/media/photos/cranes-dusk.png" loading="lazy"/>
     </div>
     <div class="footer-side">
       <a class="footer-mark" href="#hero">{title}</a>
@@ -1483,17 +1494,7 @@
     object-fit: cover;
     object-position: 15% 50%;
     transition: opacity 0.9s var(--ease-soft);
-    animation: about-drift 26s ease-in-out infinite alternate;
-    will-change: object-position, opacity;
-  }
-
-  @keyframes about-drift {
-    from {
-      object-position: 15% 50%;
-    }
-    to {
-      object-position: 85% 50%;
-    }
+    will-change: opacity;
   }
 
   .about-paper {
