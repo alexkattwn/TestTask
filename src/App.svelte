@@ -20,6 +20,7 @@
   import FlatModal from './components/FlatModal.svelte';
   import ModalLead from './components/ModalLead.svelte';
   import ModalCallback from './components/ModalCallback.svelte';
+  import SpecialOffers from './components/SpecialOffers.svelte';
 
   import quayAerial from './assets/about/quay-aerial.png';
   import interior1 from './assets/about/interior-1.png';
@@ -779,6 +780,10 @@
         <a class="btn btn-accent" href="#catalog" style="margin-top: 28px">See the homes</a>
       </div>
     </div>
+  </section>
+
+  <section id="special" class="special wrap">
+    <SpecialOffers onbook={openCallback} />
   </section>
 
   <section id="about" class="about wrap">
